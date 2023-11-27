@@ -15,7 +15,7 @@ spec:
         app: eclectic-jobs
     spec:
       containers:
-      - image: tonymarfil/eclectic-jobs:v4
+      - image: tonymarfil/eclectic-jobs:v5
         imagePullPolicy: Always
         name: eclectic-jobs
 ---

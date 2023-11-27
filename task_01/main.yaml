@@ -15,7 +15,7 @@ spec:
         app: myapp
     spec:
       containers:
-      - image: tonymarfil/myapp:v4
+      - image: tonymarfil/myapp:v5
         imagePullPolicy: Always
         name: myapp
 ---
