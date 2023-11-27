@@ -5,10 +5,6 @@ const cors = require('cors');
 const app = express();
 const port = 3000; // You can choose any port
 
-app.use(cors({
-    origin: 'http://microk8s.local:30080'
-}));
-
 // Middleware to parse JSON bodies
 app.use(express.json());
 

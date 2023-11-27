@@ -1,48 +1,84 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const jwt = require("jsonwebtoken");
 const app = express();
 const port = 3000;
 
 // Function to convert JSON to HTML
 function jsonToHtml(json) {
-    return Object.entries(json).map(([key, value]) => {
-        return `<span class="key">${key}</span>: <span class="value">${value}</span>`;
-    }).join(',<br>');
+  return Object.entries(json)
+    .map(([key, value]) => {
+      return `<span class="key">${key}</span>: <span class="value">${value}</span>`;
+    })
+    .join("<br>");
 }
 
-app.get('*', (req, res) => {
-    const hostHeader = req.headers.host;
-    const uriPath = req.originalUrl;
-    const secretKey = 'your-256-bit-secret';
-    const token = jwt.sign({ user: 'test' }, secretKey);
+app.get("*", (req, res) => {
+  // Capture all HTTP headers
+  const headers = req.headers;
 
-    // Decode the JWT
-    const decoded = jwt.verify(token, secretKey);
+  // Check for JWT in the Authorization header
+  let decodedTokenHtml = "";
+  if (headers.authorization && headers.authorization.startsWith("Bearer ")) {
+    const token = headers.authorization.split(" ")[1];
+    try {
+      const decoded = jwt.decode(token); // Decoding the JWT without verifying
+      decodedTokenHtml = jsonToHtml(decoded);
+    } catch (error) {
+      decodedTokenHtml = '<span class="error">Invalid JWT</span>';
+    }
+  }
 
-    // HTML for displaying the variables
-    const html = `
+  // HTML for displaying the headers and JWT
+  const html = `
     <html>
     <head>
-        <style>
-            body { font-family: Arial, sans-serif; background-color: white; color: black; }
-            .banner { background-color: green; color: white; padding: 10px; }
-            .main { text-align: center; }
-            .main h1 { font-size: 48px; font-weight: bold; }
-            .jwt { background-color: lightgrey; color: black; padding: 10px; margin: 20px; }
-            .key { color: blue; font-weight: bold; }
-            .value { color: darkgreen; }
-        </style>
-    </head>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background-color: #F5F5F5;
+            color: #333;
+        }
+        .banner {
+            background-color: #013C71; /* NGINX Green */
+            color: #FFFFFF;
+            padding: 10px;
+            text-align: left;
+        }
+        .main {
+            text-align: center;
+        }
+        .main h1 {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        .jwt {
+            background-color: #E6E6E6; /* Light Grey */
+            color: #333; /* Dark Grey */
+            padding: 10px;
+            margin: 20px;
+            border-radius: 4px;
+        }
+        .key {
+            color: #8DC63F; /* Light Green for header names */
+            font-weight: bold;
+        }
+        .value {
+            color: #FFFFFF; /* White for header values */
+        }
+        .error {
+            color: #FF0000; /* Red for errors */
+        }
+    </style>
+</head>
+
     <body>
         <div class="banner">
-            Host header: ${hostHeader}<br>
-            URI Path: ${uriPath}<br>
-            Authorization: Bearer ${token}
+            ${jsonToHtml(headers)}
         </div>
         <div class="jwt">
             <strong>Decoded JWT:</strong><br>
             {<br>
-            ${jsonToHtml(decoded)}<br>
+            ${decodedTokenHtml}<br>
             }
         </div>
         <div class="main">
@@ -62,10 +98,9 @@ app.get('*', (req, res) => {
     </body>
     </html>`;
 
-    res.send(html);
+  res.send(html);
 });
 
 app.listen(port, () => {
-    console.log(`Server running at http://localhost:${port}`);
+  console.log(`Server running at http://localhost:${port}`);
 });
-
